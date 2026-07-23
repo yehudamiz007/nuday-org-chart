@@ -1,0 +1,197 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NuDay Agents Hierarchy</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f8fafc;
+    --fg: #172033;
+    --muted: #5b6475;
+    --line: #64748b;
+    --neutral: #e2e8f0;
+    --input: #bfdbfe;
+    --process: #c7d2fe;
+    --storage: #99f6e4;
+    --external: #fde68a;
+    --risk: #fecaca;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --fg: #e5e7eb;
+      --muted: #a3adbd;
+      --line: #94a3b8;
+      --neutral: #334155;
+      --input: #1d4ed8;
+      --process: #4338ca;
+      --storage: #0f766e;
+      --external: #92400e;
+      --risk: #991b1b;
+    }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font:
+      14px/1.4 ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+  }
+  main {
+    max-width: 1200px;
+    margin: 32px auto;
+    padding: 0 20px;
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .title {
+    font-size: 24px;
+    font-weight: 700;
+    fill: var(--fg);
+  }
+  .label {
+    font-size: 14px;
+    font-weight: 600;
+    fill: var(--fg);
+  }
+  .small {
+    font-size: 11px;
+    fill: var(--muted);
+  }
+  .node {
+    stroke: var(--line);
+    stroke-width: 1.5;
+  }
+  .neutral {
+    fill: var(--neutral);
+  }
+  .input {
+    fill: var(--input);
+  }
+  .process {
+    fill: var(--process);
+  }
+  .storage {
+    fill: var(--storage);
+  }
+  .external {
+    fill: var(--external);
+  }
+  .risk {
+    fill: var(--risk);
+  }
+  .edge {
+    stroke: var(--line);
+    stroke-width: 2;
+    fill: none;
+  }
+  .zone {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1;
+    stroke-dasharray: 6 5;
+    opacity: 0.6;
+  }
+  .emoji {
+    font-size: 20px;
+  }
+</style>
+<main>
+  <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+    <!-- Title -->
+    <text x="500" y="35" text-anchor="middle" class="title">NuDay Agents Hierarchy</text>
+    
+    <!-- Gateway Box -->
+    <rect x="350" y="55" width="300" height="60" rx="12" class="node neutral" />
+    <text x="500" y="85" text-anchor="middle" class="label">🖥️ OpenClaw Gateway</text>
+    <text x="500" y="102" text-anchor="middle" class="small">localhost:18789 | Kimi K2.6</text>
+    
+    <!-- Arrow from Gateway to Main -->
+    <line x1="500" y1="115" x2="500" y2="150" class="edge" marker-end="url(#arrow)" />
+    
+    <!-- Main Agent -->
+    <rect x="400" y="150" width="200" height="70" rx="10" class="node input" />
+    <text x="500" y="175" text-anchor="middle" class="label">🧠 Yehuda (main)</text>
+    <text x="500" y="192" text-anchor="middle" class="small">Default Agent | Personal Assistant</text>
+    <text x="500" y="208" text-anchor="middle" class="small">WhatsApp: +972502866308</text>
+    
+    <!-- Arrows from Main to sub-agents -->
+    <line x1="500" y1="220" x2="200" y2="280" class="edge" />
+    <line x1="500" y1="220" x2="500" y2="280" class="edge" />
+    <line x1="500" y1="220" x2="800" y2="280" class="edge" />
+    
+    <!-- NuDay Organization Zone -->
+    <rect x="50" y="260" width="900" height="400" rx="16" class="zone" />
+    <text x="500" y="285" text-anchor="middle" class="label" style="fill: var(--muted);">🏢 NuDay Organization</text>
+    
+    <!-- NuDay CTO -->
+    <rect x="100" y="300" width="200" height="90" rx="10" class="node process" />
+    <text x="200" y="325" text-anchor="middle" class="label">🚀 NuDay CTO</text>
+    <text x="200" y="342" text-anchor="middle" class="small">nu-day-assistant</text>
+    <text x="200" y="358" text-anchor="middle" class="small">Architecture | Planning</text>
+    <text x="200" y="374" text-anchor="middle" class="small">Full Tools Access</text>
+    
+    <!-- NuDay Developer -->
+    <rect x="400" y="300" width="200" height="90" rx="10" class="node process" />
+    <text x="500" y="325" text-anchor="middle" class="label">💻 NuDay Developer</text>
+    <text x="500" y="342" text-anchor="middle" class="small">nuday-developer</text>
+    <text x="500" y="358" text-anchor="middle" class="small">Software Development</text>
+    <text x="500" y="374" text-anchor="middle" class="small">Coding | Debugging | Skills</text>
+    
+    <!-- NuDay PTSD Therapist -->
+    <rect x="700" y="300" width="200" height="90" rx="10" class="node storage" />
+    <text x="800" y="325" text-anchor="middle" class="label">🕊️ PTSD Therapist</text>
+    <text x="800" y="342" text-anchor="middle" class="small">ptsd-therapist</text>
+    <text x="800" y="358" text-anchor="middle" class="small">Trauma Support | CBT</text>
+    <text x="800" y="374" text-anchor="middle" class="small">Sandboxed | Limited Tools</text>
+    
+    <!-- Tools Section -->
+    <text x="500" y="430" text-anchor="middle" class="label" style="font-size: 16px;">🛠️ Available Skills &amp; Tools</text>
+    
+    <!-- Tools Categories -->
+    <rect x="80" y="450" width="250" height="180" rx="10" class="node external" />
+    <text x="205" y="475" text-anchor="middle" class="label">Development</text>
+    <text x="205" y="495" text-anchor="middle" class="small">browser-automation</text>
+    <text x="205" y="512" text-anchor="middle" class="small">node-inspect-debugger</text>
+    <text x="205" y="529" text-anchor="middle" class="small">python-debugpy</text>
+    <text x="205" y="546" text-anchor="middle" class="small">skill-creator</text>
+    <text x="205" y="563" text-anchor="middle" class="small">spike | tmux | canvas</text>
+    <text x="205" y="580" text-anchor="middle" class="small">diagram-maker</text>
+    <text x="205" y="597" text-anchor="middle" class="small">subagents</text>
+    
+    <rect x="375" y="450" width="250" height="180" rx="10" class="node external" />
+    <text x="500" y="475" text-anchor="middle" class="label">Productivity</text>
+    <text x="500" y="495" text-anchor="middle" class="small">notion</text>
+    <text x="500" y="512" text-anchor="middle" class="small">taskflow | taskflow-inbox-triage</text>
+    <text x="500" y="529" text-anchor="middle" class="small">meme-maker</text>
+    <text x="500" y="546" text-anchor="middle" class="small">weather | healthcheck</text>
+    <text x="500" y="563" text-anchor="middle" class="small">node-connect</text>
+    <text x="500" y="580" text-anchor="middle" class="small">web_search | web_fetch</text>
+    <text x="500" y="597" text-anchor="middle" class="small">image | cron</text>
+    
+    <rect x="670" y="450" width="250" height="180" rx="10" class="node external" />
+    <text x="795" y="475" text-anchor="middle" class="label">External Services</text>
+    <text x="795" y="495" text-anchor="middle" class="small">(Requires Setup)</text>
+    <text x="795" y="515" text-anchor="middle" class="small">1password</text>
+    <text x="795" y="532" text-anchor="middle" class="small">github</text>
+    <text x="795" y="549" text-anchor="middle" class="small">slack</text>
+    <text x="795" y="566" text-anchor="middle" class="small">discord</text>
+    <text x="795" y="583" text-anchor="middle" class="small">apple-notes</text>
+    <text x="795" y="600" text-anchor="middle" class="small">spotify-player</text>
+    
+    <!-- Arrow markers -->
+    <defs>
+      <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L0,6 L9,3 z" fill="var(--line)" />
+      </marker>
+    </defs>
+  </svg>
+</main>
