@@ -393,7 +393,21 @@
                 { source: 'workspace', target: 'spike', label: 'has skill' },
                 { source: 'workspace', target: 'taskflow', label: 'has skill' },
                 { source: 'workspace', target: 'tmux', label: 'has skill' },
-                { source: 'workspace', target: 'weather', label: 'has skill' }
+                { source: 'workspace', target: 'weather', label: 'has skill' },
+                
+                // Agent-specific skills
+                { source: 'main-agent', target: 'weather', label: 'uses' },
+                { source: 'main-agent', target: 'meme-maker', label: 'uses' },
+                { source: 'main-agent', target: 'browser-automation', label: 'uses' },
+                { source: 'nuday-cto', target: 'notion', label: 'uses' },
+                { source: 'nuday-cto', target: 'taskflow', label: 'uses' },
+                { source: 'nuday-cto', target: 'spike', label: 'uses' },
+                { source: 'nuday-dev', target: 'node-inspect-debugger', label: 'uses' },
+                { source: 'nuday-dev', target: 'python-debugpy', label: 'uses' },
+                { source: 'nuday-dev', target: 'skill-creator', label: 'uses' },
+                { source: 'nuday-dev', target: 'tmux', label: 'uses' },
+                { source: 'nuday-therapist', target: 'healthcheck', label: 'uses' },
+                { source: 'nuday-therapist', target: 'browser-automation', label: 'uses' }
             ]
         };
         
