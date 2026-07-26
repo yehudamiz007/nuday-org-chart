@@ -1,197 +1,555 @@
-<!doctype html>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>NuDay Agents Hierarchy</title>
-<style>
-  :root {
-    color-scheme: light dark;
-    --bg: #f8fafc;
-    --fg: #172033;
-    --muted: #5b6475;
-    --line: #64748b;
-    --neutral: #e2e8f0;
-    --input: #bfdbfe;
-    --process: #c7d2fe;
-    --storage: #99f6e4;
-    --external: #fde68a;
-    --risk: #fecaca;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f172a;
-      --fg: #e5e7eb;
-      --muted: #a3adbd;
-      --line: #94a3b8;
-      --neutral: #334155;
-      --input: #1d4ed8;
-      --process: #4338ca;
-      --storage: #0f766e;
-      --external: #92400e;
-      --risk: #991b1b;
-    }
-  }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--fg);
-    font:
-      14px/1.4 ui-sans-serif,
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      sans-serif;
-  }
-  main {
-    max-width: 1200px;
-    margin: 32px auto;
-    padding: 0 20px;
-  }
-  svg {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-  .title {
-    font-size: 24px;
-    font-weight: 700;
-    fill: var(--fg);
-  }
-  .label {
-    font-size: 14px;
-    font-weight: 600;
-    fill: var(--fg);
-  }
-  .small {
-    font-size: 11px;
-    fill: var(--muted);
-  }
-  .node {
-    stroke: var(--line);
-    stroke-width: 1.5;
-  }
-  .neutral {
-    fill: var(--neutral);
-  }
-  .input {
-    fill: var(--input);
-  }
-  .process {
-    fill: var(--process);
-  }
-  .storage {
-    fill: var(--storage);
-  }
-  .external {
-    fill: var(--external);
-  }
-  .risk {
-    fill: var(--risk);
-  }
-  .edge {
-    stroke: var(--line);
-    stroke-width: 2;
-    fill: none;
-  }
-  .zone {
-    fill: none;
-    stroke: var(--line);
-    stroke-width: 1;
-    stroke-dasharray: 6 5;
-    opacity: 0.6;
-  }
-  .emoji {
-    font-size: 20px;
-  }
-</style>
-<main>
-  <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
-    <!-- Title -->
-    <text x="500" y="35" text-anchor="middle" class="title">NuDay Agents Hierarchy</text>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NuDay Knowledge Graph</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #header h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        #controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        button:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        #graph {
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .node {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .node:hover {
+            filter: brightness(1.3);
+        }
+        
+        .node-circle {
+            stroke: #fff;
+            stroke-width: 2px;
+            transition: all 0.3s;
+        }
+        
+        .node-label {
+            font-size: 12px;
+            fill: #fff;
+            text-anchor: middle;
+            pointer-events: none;
+            font-weight: 500;
+        }
+        
+        .node-emoji {
+            font-size: 20px;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        
+        .link {
+            stroke: rgba(255,255,255,0.3);
+            stroke-width: 1.5px;
+            transition: all 0.3s;
+        }
+        
+        .link-label {
+            font-size: 10px;
+            fill: rgba(255,255,255,0.6);
+            text-anchor: middle;
+            pointer-events: none;
+        }
+        
+        .link:hover {
+            stroke: rgba(255,255,255,0.6);
+            stroke-width: 2.5px;
+        }
+        
+        #tooltip {
+            position: fixed;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.9);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            max-width: 250px;
+        }
+        
+        #tooltip.visible {
+            opacity: 1;
+        }
+        
+        #tooltip h3 {
+            margin-bottom: 5px;
+            color: #00d4ff;
+        }
+        
+        #tooltip p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        #legend {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        #legend h3 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        
+        #info-panel {
+            position: fixed;
+            right: -350px;
+            top: 70px;
+            width: 320px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            transition: right 0.3s;
+            z-index: 100;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        
+        #info-panel.visible {
+            right: 20px;
+        }
+        
+        #info-panel h2 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        
+        #info-panel .type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        
+        #info-panel .connections {
+            margin-top: 20px;
+        }
+        
+        #info-panel .connection-item {
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>🧠 NuDay Knowledge Graph</h1>
+        <div id="controls">
+            <button onclick="resetZoom()">Reset View</button>
+            <button onclick="toggleAnimation()">Pause/Play</button>
+        </div>
+    </div>
     
-    <!-- Gateway Box -->
-    <rect x="350" y="55" width="300" height="60" rx="12" class="node neutral" />
-    <text x="500" y="85" text-anchor="middle" class="label">🖥️ OpenClaw Gateway</text>
-    <text x="500" y="102" text-anchor="middle" class="small">localhost:18789 | Kimi K2.6</text>
+    <div id="graph"></div>
     
-    <!-- Arrow from Gateway to Main -->
-    <line x1="500" y1="115" x2="500" y2="150" class="edge" marker-end="url(#arrow)" />
+    <div id="tooltip">
+        <h3></h3>
+        <p></p>
+    </div>
     
-    <!-- Main Agent -->
-    <rect x="400" y="150" width="200" height="70" rx="10" class="node input" />
-    <text x="500" y="175" text-anchor="middle" class="label">🧠 Yehuda (main)</text>
-    <text x="500" y="192" text-anchor="middle" class="small">Default Agent | Personal Assistant</text>
-    <text x="500" y="208" text-anchor="middle" class="small">WhatsApp: +972502866308</text>
+    <div id="legend">
+        <h3>Legend</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e74c3c;"></div>
+            <span>Person</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #3498db;"></div>
+            <span>Agent</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #2ecc71;"></div>
+            <span>System</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #f39c12;"></div>
+            <span>Concept</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #9b59b6;"></div>
+            <span>Project</span>
+        </div>
+    </div>
     
-    <!-- Arrows from Main to sub-agents -->
-    <line x1="500" y1="220" x2="200" y2="280" class="edge" />
-    <line x1="500" y1="220" x2="500" y2="280" class="edge" />
-    <line x1="500" y1="220" x2="800" y2="280" class="edge" />
-    
-    <!-- NuDay Organization Zone -->
-    <rect x="50" y="260" width="900" height="400" rx="16" class="zone" />
-    <text x="500" y="285" text-anchor="middle" class="label" style="fill: var(--muted);">🏢 NuDay Organization</text>
-    
-    <!-- NuDay CTO -->
-    <rect x="100" y="300" width="200" height="90" rx="10" class="node process" />
-    <text x="200" y="325" text-anchor="middle" class="label">🚀 NuDay CTO</text>
-    <text x="200" y="342" text-anchor="middle" class="small">nu-day-assistant</text>
-    <text x="200" y="358" text-anchor="middle" class="small">Architecture | Planning</text>
-    <text x="200" y="374" text-anchor="middle" class="small">Full Tools Access</text>
-    
-    <!-- NuDay Developer -->
-    <rect x="400" y="300" width="200" height="90" rx="10" class="node process" />
-    <text x="500" y="325" text-anchor="middle" class="label">💻 NuDay Developer</text>
-    <text x="500" y="342" text-anchor="middle" class="small">nuday-developer</text>
-    <text x="500" y="358" text-anchor="middle" class="small">Software Development</text>
-    <text x="500" y="374" text-anchor="middle" class="small">Coding | Debugging | Skills</text>
-    
-    <!-- NuDay PTSD Therapist -->
-    <rect x="700" y="300" width="200" height="90" rx="10" class="node storage" />
-    <text x="800" y="325" text-anchor="middle" class="label">🕊️ PTSD Therapist</text>
-    <text x="800" y="342" text-anchor="middle" class="small">ptsd-therapist</text>
-    <text x="800" y="358" text-anchor="middle" class="small">Trauma Support | CBT</text>
-    <text x="800" y="374" text-anchor="middle" class="small">Sandboxed | Limited Tools</text>
-    
-    <!-- Tools Section -->
-    <text x="500" y="430" text-anchor="middle" class="label" style="font-size: 16px;">🛠️ Available Skills &amp; Tools</text>
-    
-    <!-- Tools Categories -->
-    <rect x="80" y="450" width="250" height="180" rx="10" class="node external" />
-    <text x="205" y="475" text-anchor="middle" class="label">Development</text>
-    <text x="205" y="495" text-anchor="middle" class="small">browser-automation</text>
-    <text x="205" y="512" text-anchor="middle" class="small">node-inspect-debugger</text>
-    <text x="205" y="529" text-anchor="middle" class="small">python-debugpy</text>
-    <text x="205" y="546" text-anchor="middle" class="small">skill-creator</text>
-    <text x="205" y="563" text-anchor="middle" class="small">spike | tmux | canvas</text>
-    <text x="205" y="580" text-anchor="middle" class="small">diagram-maker</text>
-    <text x="205" y="597" text-anchor="middle" class="small">subagents</text>
-    
-    <rect x="375" y="450" width="250" height="180" rx="10" class="node external" />
-    <text x="500" y="475" text-anchor="middle" class="label">Productivity</text>
-    <text x="500" y="495" text-anchor="middle" class="small">notion</text>
-    <text x="500" y="512" text-anchor="middle" class="small">taskflow | taskflow-inbox-triage</text>
-    <text x="500" y="529" text-anchor="middle" class="small">meme-maker</text>
-    <text x="500" y="546" text-anchor="middle" class="small">weather | healthcheck</text>
-    <text x="500" y="563" text-anchor="middle" class="small">node-connect</text>
-    <text x="500" y="580" text-anchor="middle" class="small">web_search | web_fetch</text>
-    <text x="500" y="597" text-anchor="middle" class="small">image | cron</text>
-    
-    <rect x="670" y="450" width="250" height="180" rx="10" class="node external" />
-    <text x="795" y="475" text-anchor="middle" class="label">External Services</text>
-    <text x="795" y="495" text-anchor="middle" class="small">(Requires Setup)</text>
-    <text x="795" y="515" text-anchor="middle" class="small">1password</text>
-    <text x="795" y="532" text-anchor="middle" class="small">github</text>
-    <text x="795" y="549" text-anchor="middle" class="small">slack</text>
-    <text x="795" y="566" text-anchor="middle" class="small">discord</text>
-    <text x="795" y="583" text-anchor="middle" class="small">apple-notes</text>
-    <text x="795" y="600" text-anchor="middle" class="small">spotify-player</text>
-    
-    <!-- Arrow markers -->
-    <defs>
-      <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-        <path d="M0,0 L0,6 L9,3 z" fill="var(--line)" />
-      </marker>
-    </defs>
-  </svg>
-</main>
+    <div id="info-panel">
+        <h2 id="info-title"></h2>
+        <div class="type-badge" id="info-type"></div>
+        <p id="info-details"></p>
+        <div class="connections" id="info-connections"></div>
+    </div>
+
+    <script>
+        const colors = {
+            person: '#e74c3c',
+            agent: '#3498db',
+            system: '#2ecc71',
+            concept: '#f39c12',
+            project: '#9b59b6'
+        };
+        
+        let simulation;
+        let isAnimating = true;
+        let svg, g, zoom;
+        
+        // Graph data embedded directly for static hosting
+        const data = {
+            nodes: [
+                // People
+                { id: 'yehuda', label: 'Yehuda Mizrahi', type: 'person', emoji: '👤', details: 'CTO of NuDay' },
+                
+                // Agents
+                { id: 'main-agent', label: 'Main Agent', type: 'agent', emoji: '🤖', details: 'General purpose assistant' },
+                { id: 'nuday-cto', label: 'NuDay CTO', type: 'agent', emoji: '🚀', details: 'Executive assistant' },
+                { id: 'nuday-dev', label: 'NuDay Developer', type: 'agent', emoji: '💻', details: 'Software engineer' },
+                { id: 'nuday-therapist', label: 'NuDay PTSD Therapist', type: 'agent', emoji: '🕊️', details: 'Therapeutic support' },
+                
+                // Systems
+                { id: 'workspace', label: 'OpenClaw Workspace', type: 'system', emoji: '🏠', details: 'Multi-agent system' },
+                { id: 'memory', label: 'Memory System', type: 'system', emoji: '🧠', details: 'File-based persistence' },
+                { id: 'heartbeat', label: 'Heartbeat System', type: 'system', emoji: '💓', details: 'Periodic check-ins' },
+                { id: 'cron', label: 'Cron System', type: 'system', emoji: '⏰', details: 'Scheduled tasks' },
+                
+                // Concepts
+                { id: 'agents-pattern', label: 'AGENTS.md Pattern', type: 'concept', emoji: '📋', details: 'Workspace rules' },
+                { id: 'soul-pattern', label: 'SOUL.md Pattern', type: 'concept', emoji: '❤️', details: 'Personality & values' },
+                { id: 'identity-pattern', label: 'IDENTITY.md Pattern', type: 'concept', emoji: '🆔', details: 'Identity card' },
+                { id: 'user-pattern', label: 'USER.md Pattern', type: 'concept', emoji: '👥', details: 'User profile' },
+                { id: 'tools-pattern', label: 'TOOLS.md Pattern', type: 'concept', emoji: '🛠️', details: 'Tool notes' },
+                
+                // Projects
+                { id: 'nuday', label: 'NuDay', type: 'project', emoji: '🏢', details: 'Company' }
+            ],
+            edges: [
+                // Yehuda relationships
+                { from: 'yehuda', to: 'main-agent', label: 'uses' },
+                { from: 'yehuda', to: 'nuday-cto', label: 'served by' },
+                { from: 'yehuda', to: 'nuday-dev', label: 'served by' },
+                { from: 'yehuda', to: 'nuday-therapist', label: 'served by' },
+                { from: 'yehuda', to: 'nuday', label: 'CTO of' },
+                
+                // Workspace contains
+                { from: 'workspace', to: 'main-agent', label: 'contains' },
+                { from: 'workspace', to: 'nuday-cto', label: 'contains' },
+                { from: 'workspace', to: 'nuday-dev', label: 'contains' },
+                { from: 'workspace', to: 'nuday-therapist', label: 'contains' },
+                { from: 'workspace', to: 'memory', label: 'uses' },
+                { from: 'workspace', to: 'heartbeat', label: 'uses' },
+                { from: 'workspace', to: 'cron', label: 'uses' },
+                
+                // Patterns used by agents
+                { from: 'main-agent', to: 'agents-pattern', label: 'follows' },
+                { from: 'main-agent', to: 'soul-pattern', label: 'follows' },
+                { from: 'main-agent', to: 'identity-pattern', label: 'follows' },
+                { from: 'main-agent', to: 'user-pattern', label: 'follows' },
+                { from: 'main-agent', to: 'tools-pattern', label: 'follows' },
+                
+                { from: 'nuday-cto', to: 'agents-pattern', label: 'follows' },
+                { from: 'nuday-cto', to: 'soul-pattern', label: 'follows' },
+                { from: 'nuday-cto', to: 'identity-pattern', label: 'follows' },
+                
+                { from: 'nuday-dev', to: 'agents-pattern', label: 'follows' },
+                { from: 'nuday-dev', to: 'soul-pattern', label: 'follows' },
+                { from: 'nuday-dev', to: 'identity-pattern', label: 'follows' },
+                
+                { from: 'nuday-therapist', to: 'agents-pattern', label: 'follows' },
+                { from: 'nuday-therapist', to: 'soul-pattern', label: 'follows' },
+                { from: 'nuday-therapist', to: 'identity-pattern', label: 'follows' },
+                
+                // NuDay organization
+                { from: 'nuday', to: 'nuday-cto', label: 'has agent' },
+                { from: 'nuday', to: 'nuday-dev', label: 'has agent' },
+                { from: 'nuday', to: 'nuday-therapist', label: 'has agent' }
+            ]
+        };
+        
+        function initGraph() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            // Create SVG
+            svg = d3.select('#graph')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+            
+            // Add zoom behavior
+            zoom = d3.zoom()
+                .scaleExtent([0.1, 4])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+            
+            svg.call(zoom);
+            
+            g = svg.append('g');
+            
+            // Create force simulation
+            simulation = d3.forceSimulation(data.nodes)
+                .force('link', d3.forceLink(data.edges).id(d => d.id).distance(150))
+                .force('charge', d3.forceManyBody().strength(-500))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(50));
+            
+            // Create links
+            const link = g.append('g')
+                .selectAll('line')
+                .data(data.edges)
+                .enter()
+                .append('line')
+                .attr('class', 'link');
+            
+            // Create link labels
+            const linkLabel = g.append('g')
+                .selectAll('text')
+                .data(data.edges)
+                .enter()
+                .append('text')
+                .attr('class', 'link-label')
+                .text(d => d.label);
+            
+            // Create nodes
+            const node = g.append('g')
+                .selectAll('g')
+                .data(data.nodes)
+                .enter()
+                .append('g')
+                .attr('class', 'node')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+            
+            // Add circles to nodes
+            node.append('circle')
+                .attr('class', 'node-circle')
+                .attr('r', 30)
+                .attr('fill', d => colors[d.type])
+                .attr('fill-opacity', 0.8);
+            
+            // Add emojis to nodes
+            node.append('text')
+                .attr('class', 'node-emoji')
+                .attr('dy', '5')
+                .text(d => d.emoji);
+            
+            // Add labels to nodes
+            node.append('text')
+                .attr('class', 'node-label')
+                .attr('dy', 50)
+                .text(d => d.label);
+            
+            // Tooltip events
+            const tooltip = document.getElementById('tooltip');
+            
+            node.on('mouseover', (event, d) => {
+                tooltip.querySelector('h3').textContent = d.emoji + ' ' + d.label;
+                tooltip.querySelector('p').textContent = d.details;
+                tooltip.classList.add('visible');
+                tooltip.style.left = event.clientX + 15 + 'px';
+                tooltip.style.top = event.clientY + 15 + 'px';
+            })
+            .on('mousemove', (event) => {
+                tooltip.style.left = event.clientX + 15 + 'px';
+                tooltip.style.top = event.clientY + 15 + 'px';
+            })
+            .on('mouseout', () => {
+                tooltip.classList.remove('visible');
+            })
+            .on('click', (event, d) => {
+                showInfoPanel(d, data.edges);
+                event.stopPropagation();
+            });
+            
+            // Click background to close panel
+            svg.on('click', () => {
+                document.getElementById('info-panel').classList.remove('visible');
+            });
+            
+            // Update positions on tick
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+                
+                linkLabel
+                    .attr('x', d => (d.source.x + d.target.x) / 2)
+                    .attr('y', d => (d.source.y + d.target.y) / 2);
+                
+                node.attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+        }
+        
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+        
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+        
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+        
+        function resetZoom() {
+            svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+        }
+        
+        function toggleAnimation() {
+            if (isAnimating) {
+                simulation.stop();
+            } else {
+                simulation.restart();
+            }
+            isAnimating = !isAnimating;
+        }
+        
+        function showInfoPanel(nodeData, edges) {
+            const panel = document.getElementById('info-panel');
+            const title = document.getElementById('info-title');
+            const type = document.getElementById('info-type');
+            const details = document.getElementById('info-details');
+            const connections = document.getElementById('info-connections');
+            
+            title.textContent = nodeData.emoji + ' ' + nodeData.label;
+            type.textContent = nodeData.type;
+            type.style.background = colors[nodeData.type];
+            details.textContent = nodeData.details;
+            
+            // Find connections
+            const connected = edges.filter(e => 
+                e.source.id === nodeData.id || e.target.id === nodeData.id
+            );
+            
+            connections.innerHTML = '<h3>Connections</h3>';
+            connected.forEach(edge => {
+                const isSource = edge.source.id === nodeData.id;
+                const other = isSource ? edge.target : edge.source;
+                const div = document.createElement('div');
+                div.className = 'connection-item';
+                div.innerHTML = `${other.emoji} <strong>${other.label}</strong> <span style="color:#888">(${edge.label})</span>`;
+                connections.appendChild(div);
+            });
+            
+            panel.classList.add('visible');
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            svg.attr('width', width).attr('height', height);
+            simulation.force('center', d3.forceCenter(width / 2, height / 2));
+            simulation.alpha(0.3).restart();
+        });
+        
+        // Initialize
+        initGraph();
+    </script>
+</body>
+</html>
