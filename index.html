@@ -267,6 +267,10 @@
             <div class="legend-color" style="background: #9b59b6;"></div>
             <span>Project</span>
         </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #1abc9c;"></div>
+            <span>Skill</span>
+        </div>
     </div>
     
     <div id="info-panel">
@@ -282,7 +286,8 @@
             agent: '#3498db',
             system: '#2ecc71',
             concept: '#f39c12',
-            project: '#9b59b6'
+            project: '#9b59b6',
+            skill: '#1abc9c'
         };
         
         let simulation;
@@ -315,7 +320,23 @@
                 { id: 'tools-pattern', label: 'TOOLS.md Pattern', type: 'concept', emoji: '🛠️', details: 'Tool notes' },
                 
                 // Projects
-                { id: 'nuday', label: 'NuDay', type: 'project', emoji: '🏢', details: 'Company' }
+                { id: 'nuday', label: 'NuDay', type: 'project', emoji: '🏢', details: 'Company' },
+                
+                // Skills
+                { id: 'browser-automation', label: 'Browser Automation', type: 'skill', emoji: '🌐', details: 'Web page control and automation' },
+                { id: 'canvas', label: 'Canvas', type: 'skill', emoji: '🎨', details: 'HTML canvas presentation' },
+                { id: 'diagram-maker', label: 'Diagram Maker', type: 'skill', emoji: '📊', details: 'SVG/HTML diagram creation' },
+                { id: 'healthcheck', label: 'Healthcheck', type: 'skill', emoji: '🔒', details: 'Security audit and hardening' },
+                { id: 'meme-maker', label: 'Meme Maker', type: 'skill', emoji: '😂', details: 'Meme template search and generation' },
+                { id: 'node-connect', label: 'Node Connect', type: 'skill', emoji: '📱', details: 'Device pairing and connection' },
+                { id: 'node-inspect-debugger', label: 'Node Debugger', type: 'skill', emoji: '🐛', details: 'Node.js debugging' },
+                { id: 'notion', label: 'Notion', type: 'skill', emoji: '📝', details: 'Notion CLI/API integration' },
+                { id: 'python-debugpy', label: 'Python Debugpy', type: 'skill', emoji: '🐍', details: 'Python debugging' },
+                { id: 'skill-creator', label: 'Skill Creator', type: 'skill', emoji: '🔧', details: 'Skill management and validation' },
+                { id: 'spike', label: 'Spike', type: 'skill', emoji: '🧪', details: 'Prototype validation' },
+                { id: 'taskflow', label: 'Taskflow', type: 'skill', emoji: '📋', details: 'Multi-step task coordination' },
+                { id: 'tmux', label: 'Tmux', type: 'skill', emoji: '🖥️', details: 'Terminal session control' },
+                { id: 'weather', label: 'Weather', type: 'skill', emoji: '🌤️', details: 'Weather forecasts' }
             ],
             edges: [
                 // Yehuda relationships
@@ -356,7 +377,23 @@
                 // NuDay organization
                 { source: 'nuday', target: 'nuday-cto', label: 'has agent' },
                 { source: 'nuday', target: 'nuday-dev', label: 'has agent' },
-                { source: 'nuday', target: 'nuday-therapist', label: 'has agent' }
+                { source: 'nuday', target: 'nuday-therapist', label: 'has agent' },
+                
+                // Skills available to workspace
+                { source: 'workspace', target: 'browser-automation', label: 'has skill' },
+                { source: 'workspace', target: 'canvas', label: 'has skill' },
+                { source: 'workspace', target: 'diagram-maker', label: 'has skill' },
+                { source: 'workspace', target: 'healthcheck', label: 'has skill' },
+                { source: 'workspace', target: 'meme-maker', label: 'has skill' },
+                { source: 'workspace', target: 'node-connect', label: 'has skill' },
+                { source: 'workspace', target: 'node-inspect-debugger', label: 'has skill' },
+                { source: 'workspace', target: 'notion', label: 'has skill' },
+                { source: 'workspace', target: 'python-debugpy', label: 'has skill' },
+                { source: 'workspace', target: 'skill-creator', label: 'has skill' },
+                { source: 'workspace', target: 'spike', label: 'has skill' },
+                { source: 'workspace', target: 'taskflow', label: 'has skill' },
+                { source: 'workspace', target: 'tmux', label: 'has skill' },
+                { source: 'workspace', target: 'weather', label: 'has skill' }
             ]
         };
         
@@ -420,15 +457,9 @@
             // Add circles to nodes
             node.append('circle')
                 .attr('class', 'node-circle')
-                .attr('r', 30)
+                .attr('r', 12)
                 .attr('fill', d => colors[d.type])
                 .attr('fill-opacity', 0.8);
-            
-            // Add emojis to nodes
-            node.append('text')
-                .attr('class', 'node-emoji')
-                .attr('dy', '5')
-                .text(d => d.emoji);
             
             // Add labels to nodes
             node.append('text')
@@ -440,7 +471,7 @@
             const tooltip = document.getElementById('tooltip');
             
             node.on('mouseover', (event, d) => {
-                tooltip.querySelector('h3').textContent = d.emoji + ' ' + d.label;
+                tooltip.querySelector('h3').textContent = d.label;
                 tooltip.querySelector('p').textContent = d.details;
                 tooltip.classList.add('visible');
                 tooltip.style.left = event.clientX + 15 + 'px';
@@ -516,7 +547,7 @@
             const details = document.getElementById('info-details');
             const connections = document.getElementById('info-connections');
             
-            title.textContent = nodeData.emoji + ' ' + nodeData.label;
+            title.textContent = nodeData.label;
             type.textContent = nodeData.type;
             type.style.background = colors[nodeData.type];
             details.textContent = nodeData.details;
@@ -539,7 +570,7 @@
                 if (other) {
                     const div = document.createElement('div');
                     div.className = 'connection-item';
-                    div.innerHTML = `${other.emoji} <strong>${other.label}</strong> <span style="color:#888">(${edge.label})</span>`;
+                    div.innerHTML = `<strong>${other.label}</strong> <span style="color:#888">(${edge.label})</span>`;
                     connections.appendChild(div);
                 }
             });
