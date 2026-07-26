@@ -319,44 +319,44 @@
             ],
             edges: [
                 // Yehuda relationships
-                { from: 'yehuda', to: 'main-agent', label: 'uses' },
-                { from: 'yehuda', to: 'nuday-cto', label: 'served by' },
-                { from: 'yehuda', to: 'nuday-dev', label: 'served by' },
-                { from: 'yehuda', to: 'nuday-therapist', label: 'served by' },
-                { from: 'yehuda', to: 'nuday', label: 'CTO of' },
+                { source: 'yehuda', target: 'main-agent', label: 'uses' },
+                { source: 'yehuda', target: 'nuday-cto', label: 'served by' },
+                { source: 'yehuda', target: 'nuday-dev', label: 'served by' },
+                { source: 'yehuda', target: 'nuday-therapist', label: 'served by' },
+                { source: 'yehuda', target: 'nuday', label: 'CTO of' },
                 
                 // Workspace contains
-                { from: 'workspace', to: 'main-agent', label: 'contains' },
-                { from: 'workspace', to: 'nuday-cto', label: 'contains' },
-                { from: 'workspace', to: 'nuday-dev', label: 'contains' },
-                { from: 'workspace', to: 'nuday-therapist', label: 'contains' },
-                { from: 'workspace', to: 'memory', label: 'uses' },
-                { from: 'workspace', to: 'heartbeat', label: 'uses' },
-                { from: 'workspace', to: 'cron', label: 'uses' },
+                { source: 'workspace', target: 'main-agent', label: 'contains' },
+                { source: 'workspace', target: 'nuday-cto', label: 'contains' },
+                { source: 'workspace', target: 'nuday-dev', label: 'contains' },
+                { source: 'workspace', target: 'nuday-therapist', label: 'contains' },
+                { source: 'workspace', target: 'memory', label: 'uses' },
+                { source: 'workspace', target: 'heartbeat', label: 'uses' },
+                { source: 'workspace', target: 'cron', label: 'uses' },
                 
                 // Patterns used by agents
-                { from: 'main-agent', to: 'agents-pattern', label: 'follows' },
-                { from: 'main-agent', to: 'soul-pattern', label: 'follows' },
-                { from: 'main-agent', to: 'identity-pattern', label: 'follows' },
-                { from: 'main-agent', to: 'user-pattern', label: 'follows' },
-                { from: 'main-agent', to: 'tools-pattern', label: 'follows' },
+                { source: 'main-agent', target: 'agents-pattern', label: 'follows' },
+                { source: 'main-agent', target: 'soul-pattern', label: 'follows' },
+                { source: 'main-agent', target: 'identity-pattern', label: 'follows' },
+                { source: 'main-agent', target: 'user-pattern', label: 'follows' },
+                { source: 'main-agent', target: 'tools-pattern', label: 'follows' },
                 
-                { from: 'nuday-cto', to: 'agents-pattern', label: 'follows' },
-                { from: 'nuday-cto', to: 'soul-pattern', label: 'follows' },
-                { from: 'nuday-cto', to: 'identity-pattern', label: 'follows' },
+                { source: 'nuday-cto', target: 'agents-pattern', label: 'follows' },
+                { source: 'nuday-cto', target: 'soul-pattern', label: 'follows' },
+                { source: 'nuday-cto', target: 'identity-pattern', label: 'follows' },
                 
-                { from: 'nuday-dev', to: 'agents-pattern', label: 'follows' },
-                { from: 'nuday-dev', to: 'soul-pattern', label: 'follows' },
-                { from: 'nuday-dev', to: 'identity-pattern', label: 'follows' },
+                { source: 'nuday-dev', target: 'agents-pattern', label: 'follows' },
+                { source: 'nuday-dev', target: 'soul-pattern', label: 'follows' },
+                { source: 'nuday-dev', target: 'identity-pattern', label: 'follows' },
                 
-                { from: 'nuday-therapist', to: 'agents-pattern', label: 'follows' },
-                { from: 'nuday-therapist', to: 'soul-pattern', label: 'follows' },
-                { from: 'nuday-therapist', to: 'identity-pattern', label: 'follows' },
+                { source: 'nuday-therapist', target: 'agents-pattern', label: 'follows' },
+                { source: 'nuday-therapist', target: 'soul-pattern', label: 'follows' },
+                { source: 'nuday-therapist', target: 'identity-pattern', label: 'follows' },
                 
                 // NuDay organization
-                { from: 'nuday', to: 'nuday-cto', label: 'has agent' },
-                { from: 'nuday', to: 'nuday-dev', label: 'has agent' },
-                { from: 'nuday', to: 'nuday-therapist', label: 'has agent' }
+                { source: 'nuday', target: 'nuday-cto', label: 'has agent' },
+                { source: 'nuday', target: 'nuday-dev', label: 'has agent' },
+                { source: 'nuday', target: 'nuday-therapist', label: 'has agent' }
             ]
         };
         
@@ -521,19 +521,27 @@
             type.style.background = colors[nodeData.type];
             details.textContent = nodeData.details;
             
-            // Find connections
-            const connected = edges.filter(e => 
-                e.source.id === nodeData.id || e.target.id === nodeData.id
-            );
+            // Find connections - handle both object references and string IDs
+            const connected = edges.filter(e => {
+                const sourceId = typeof e.source === 'object' ? e.source.id : e.source;
+                const targetId = typeof e.target === 'object' ? e.target.id : e.target;
+                return sourceId === nodeData.id || targetId === nodeData.id;
+            });
             
             connections.innerHTML = '<h3>Connections</h3>';
             connected.forEach(edge => {
-                const isSource = edge.source.id === nodeData.id;
-                const other = isSource ? edge.target : edge.source;
-                const div = document.createElement('div');
-                div.className = 'connection-item';
-                div.innerHTML = `${other.emoji} <strong>${other.label}</strong> <span style="color:#888">(${edge.label})</span>`;
-                connections.appendChild(div);
+                const sourceId = typeof edge.source === 'object' ? edge.source.id : edge.source;
+                const isSource = sourceId === nodeData.id;
+                const other = isSource ? 
+                    (typeof edge.target === 'object' ? edge.target : data.nodes.find(n => n.id === edge.target)) :
+                    (typeof edge.source === 'object' ? edge.source : data.nodes.find(n => n.id === edge.source));
+                
+                if (other) {
+                    const div = document.createElement('div');
+                    div.className = 'connection-item';
+                    div.innerHTML = `${other.emoji} <strong>${other.label}</strong> <span style="color:#888">(${edge.label})</span>`;
+                    connections.appendChild(div);
+                }
             });
             
             panel.classList.add('visible');
