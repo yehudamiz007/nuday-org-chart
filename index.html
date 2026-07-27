@@ -25,7 +25,7 @@
             top: 0;
             left: 0;
             right: 0;
-            padding: 15px 20px;
+            padding: 10px 20px;
             background: rgba(0,0,0,0.3);
             backdrop-filter: blur(10px);
             z-index: 100;
@@ -38,6 +38,33 @@
             font-size: 1.0rem;
             color: #f1c40f;
             font-weight: 600;
+        }
+        
+        #nav-tabs {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .nav-tab {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            text-decoration: none;
+        }
+        
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .nav-tab.active {
+            background: rgba(241, 196, 15, 0.3);
+            color: #f1c40f;
         }
         
         #controls {
@@ -231,6 +258,10 @@
 <body>
     <div id="header">
         <h1>NuDay Knowledge Graph</h1>
+        <div id="nav-tabs">
+            <a href="/nuday-org-chart/" class="nav-tab active">Knowledge Graph</a>
+            <a href="/mindmap/" class="nav-tab">Mindmap</a>
+        </div>
         <div id="controls">
             <button onclick="resetZoom()">Reset View</button>
             <button onclick="toggleAnimation()">Pause/Play</button>
